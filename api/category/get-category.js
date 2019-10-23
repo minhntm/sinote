@@ -13,13 +13,13 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let cate_id = decodeURIComponent(event.pathParameters.cate_id);
+    let cateId = decodeURIComponent(event.pathParameters.cate_id);
 
     let params = {
       TableName: tableName,
       KeyConditionExpression: 'id = :cate_id and relationship_id = :cate_id',
       ExpressionAttributeValues: {
-        ':cate_id': cate_id,
+        ':cate_id': cateId,
       },
       Limit: 1
     };

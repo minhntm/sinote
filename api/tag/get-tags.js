@@ -12,14 +12,14 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let user_id = util.getUserId(event.headers);
+    let userId = util.getUserId(event.headers);
 
     let params = {
       TableName: tableName,
       IndexName: 'user-index',
-      KeyConditionExpression: 'user_id = :uid and begins_with(relationship_id, :prefix_tag_id)',
+      KeyConditionExpression: 'user_id = :uid and begins_with(update_timestamp, :prefix_tag_id)',
       ExpressionAttributeValues: {
-        ':uid': user_id,
+        ':uid': userId,
         ':prefix_tag_id': util.TAG_ID_PREFIX
       },
       ScanIndexForward: false

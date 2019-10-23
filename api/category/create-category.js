@@ -16,9 +16,9 @@ exports.handler = async event => {
   try {
     const body = JSON.parse(event.body);
 
-    const user_id = util.getUserId(event.headers);
-    const cate_id = util.CATEGORY_ID_PREFIX + ':' + uuidv4();
-    const timestamp = util.CATEGORY_ID_PREFIX + moment().unix();
+    const userId = util.getUserId(event.headers);
+    const cateId = util.CATEGORY_ID_PREFIX + ':' + uuidv4();
+    const timestamp = util.CATEGORY_ID_PREFIX + ':' + moment().unix();
 
     if (!body.name) {
       return {
@@ -32,12 +32,12 @@ exports.handler = async event => {
     }
     const name = body.name;
     const newCate = {
-      id: cate_id,
-      relationship_id: cate_id,
+      id: cateId,
+      relationship_id: cateId,
       create_timestamp: timestamp,
       update_timestamp: timestamp,
       name: name,
-      user_id: user_id
+      user_id: userId
     }
 
     let data = await dynamodb.put({

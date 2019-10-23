@@ -114,6 +114,51 @@ functions:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
 
+  # note endpoint
+  get-note:
+    handler: api/note/get-note.handler
+    description: GET /notes/{note_id}
+    events:
+      - http:
+          path: notes/{note_id}
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  get-notes:
+    handler: api/note/get-notes.handler
+    description: GET /notes
+    events:
+      - http:
+          path: notes
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  create-note:
+    handler: api/note/create-note.handler
+    description: POST /notes
+    events:
+      - http:
+          path: notes
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  update-note:
+    handler: api/note/update-note.handler
+    description: PUT /notes/{note_id}
+    events:
+      - http:
+          path: notes/{note_id}
+          method: put
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
 resources:
   Resources:
     NotesTable:
@@ -162,7 +207,7 @@ resources:
             KeySchema:
               - AttributeName: user_id
                 KeyType: HASH
-              - AttributeName: relationship_id
+              - AttributeName: update_timestamp
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL

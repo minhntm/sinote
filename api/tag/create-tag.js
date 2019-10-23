@@ -7,7 +7,6 @@ AWS.config.update({ region: 'ap-northeast-1' });
 
 const util = require('../util');
 const moment = require('moment');
-const uuidv4 = require('uuid/v4');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.NOTES_TABLE;
@@ -15,10 +14,6 @@ const tableName = process.env.NOTES_TABLE;
 exports.handler = async event => {
   try {
     const body = JSON.parse(event.body);
-
-    const user_id = util.getUserId(event.headers);
-    const tag_id = util.TAG_ID_PREFIX + ':' + uuidv4();
-    const timestamp = util.TAG_ID_PREFIX + moment().unix();
 
     if (!body.name) {
       return {
@@ -31,13 +26,18 @@ exports.handler = async event => {
       }
     }
     const name = body.name;
+
+    const userId = util.getUserId(event.headers);
+    const tagId = util.TAG_ID_PREFIX + ':' + name + userId;
+    const timestamp = util.TAG_ID_PREFIX + ':' + moment().unix();
+
     const newTag = {
-      id: tag_id,
-      relationship_id: tag_id,
+      id: tagId,
+      relationship_id: tagId,
       create_timestamp: timestamp,
       update_timestamp: timestamp,
       name: name,
-      user_id: user_id
+      user_id: userId
     }
 
     let data = await dynamodb.put({
