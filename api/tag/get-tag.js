@@ -1,5 +1,5 @@
 /**
- * Route: GET /categories/{cate_id}
+ * Route: GET /tags/{tag_id}
  */
 
 const AWS = require('aws-sdk');
@@ -13,13 +13,13 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let cate_id = decodeURIComponent(event.pathParameters.cate_id);
+    let tag_id = decodeURIComponent(event.pathParameters.tag_id);
 
     let params = {
       TableName: tableName,
-      KeyConditionExpression: 'id = :cate_id and relationship_id = :cate_id',
+      KeyConditionExpression: 'id = :tag_id and relationship_id = :tag_id',
       ExpressionAttributeValues: {
-        ':cate_id': cate_id,
+        ':tag_id': tag_id,
       },
       Limit: 1
     };

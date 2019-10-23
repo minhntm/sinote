@@ -46,6 +46,7 @@ functions:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
 
+  # category endpoint
   get-category:
     handler: api/category/get-category.handler
     description: GET /categories/{cate_id}
@@ -74,6 +75,40 @@ functions:
     events:
       - http:
           path: categories
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  # tag endpoint
+  get-tag:
+    handler: api/tag/get-tag.handler
+    description: GET /tags/{tag_id}
+    events:
+      - http:
+          path: tags/{tag_id}
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  get-tags:
+    handler: api/tag/get-tags.handler
+    description: GET /tags
+    events:
+      - http:
+          path: tags
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  create-tag:
+    handler: api/tag/create-tag.handler
+    description: POST /tags
+    events:
+      - http:
+          path: tags
           method: post
           cors:
             origin: '*'

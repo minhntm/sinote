@@ -1,11 +1,10 @@
 /**
- * Route: GET /categories/{cate_id}
+ * Route: GET /tags/
  */
 
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const _ = require('underscore');
 const util = require('../util');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
@@ -13,31 +12,26 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let cate_id = decodeURIComponent(event.pathParameters.cate_id);
+    let user_id = util.getUserId(event.headers);
 
     let params = {
       TableName: tableName,
-      KeyConditionExpression: 'id = :cate_id and relationship_id = :cate_id',
+      IndexName: 'user-index',
+      KeyConditionExpression: 'user_id = :uid and begins_with(relationship_id, :prefix_tag_id)',
       ExpressionAttributeValues: {
-        ':cate_id': cate_id,
+        ':uid': user_id,
+        ':prefix_tag_id': util.TAG_ID_PREFIX
       },
-      Limit: 1
+      ScanIndexForward: false
     };
 
     let data = await dynamodb.query(params).promise();
-    if (!_.isEmpty(data.Items)) {
-      return {
-        statusCode: 200,
-        headers: util.getResponseHeaders(),
-        body: JSON.stringify(data.Items[0])
-      }
-    } else {
-      return {
-        statusCode: 404,
-        headers: util.getResponseHeaders()
-      }
-    }
 
+    return {
+      statusCode: 200,
+      headers: util.getResponseHeaders(),
+      body: JSON.stringify(data)
+    }
   } catch (err) {
     console.log('Error', err);
     return {
