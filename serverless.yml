@@ -46,6 +46,39 @@ functions:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
 
+  get-category:
+    handler: api/category/get-category.handler
+    description: GET /categories/{cate_id}
+    events:
+      - http:
+          path: categories/{cate_id}
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  get-categories:
+    handler: api/category/get-categories.handler
+    description: GET /categories
+    events:
+      - http:
+          path: categories
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  create-category:
+    handler: api/category/create-category.handler
+    description: POST /category
+    events:
+      - http:
+          path: categories
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
 resources:
   Resources:
     NotesTable:
