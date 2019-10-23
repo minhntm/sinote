@@ -150,11 +150,11 @@ functions:
 
   update-note:
     handler: api/note/update-note.handler
-    description: PUT /notes/{note_id}
+    description: PATCH /notes/{note_id}
     events:
       - http:
           path: notes/{note_id}
-          method: put
+          method: patch
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
