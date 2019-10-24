@@ -33,11 +33,11 @@ exports.handler = async event => {
     const category = await utils.getCategory(dynamodb, tableName, categoryId);
     if (!category) {
       return {
-        statusCode: 400,
+        statusCode: 404,
         headers: utils.getResponseHeaders(),
         body: JSON.stringify({
-          error: 'ValueError',
-          message: 'Invalid category id'
+          error: 'Not found',
+          message: 'Category not found'
         })
       }
     }

@@ -1,5 +1,5 @@
 /**
- * Route: PATCH /notes/{note_id}
+ * Route: POST /notes/{note_id}/unattach-tag
  */
 
 const AWS = require('aws-sdk');
@@ -12,11 +12,15 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
+  // TODO: category is optinal
+  // if missing this value, set it to default category
   try {
-    let noteId = decodeURIComponent(event.pathParameters.note_id);
-
+    const noteId = decodeURIComponent(event.pathParameters.note_id);
     const body = JSON.parse(event.body);
-    if (!body.title || !body.content) {
+
+    const timestamp = moment().unix();
+
+    if (!body.tag_id) {
       return {
         statusCode: 400,
         headers: utils.getResponseHeaders(),
@@ -26,10 +30,7 @@ exports.handler = async event => {
         })
       }
     }
-
-    const title = body.title;
-    const content = body.content;
-    const timestamp = moment().unix();
+    const tagId = body.tag_id
 
     const note = await utils.getNote(dynamodb, tableName, noteId);
     if (!note) {
@@ -42,47 +43,39 @@ exports.handler = async event => {
         })
       }
     }
-
-    // create revision
-    const newRevision = {
-      id: noteId,
-      relationship_id: 'v' + note.revision,
-      create_timestamp: timestamp.toString(),
-      update_timestamp: timestamp.toString(),
-      title: note.title,
-      content: note.content
-    } 
     
-    let data = await dynamodb.put({ TableName: tableName, Item: newRevision }).promise();
+    if (note.tags && !note.tags.includes(tagId) || !note.tags) {
+      return {
+        statusCode: 200,
+        headers: utils.getResponseHeaders(),
+        body: JSON.stringify(note)
+      }
+    }
 
-    // update title in cate - note relationship
-    data = await dynamodb.update({
+    await dynamodb.delete({
       TableName: tableName,
       Key: {
-        id: note.category_id,
+        id: tagId,
         relationship_id: noteId
-      },
-      UpdateExpression: 'set update_timestamp = :ts, title = :title',
-      ExpressionAttributeValues: {
-        ':ts': utils.NOTE_ID_PREFIX + ':' + timestamp,
-        ':title': title
-      },
-      ReturnValues: 'UPDATED_NEW'
+      }
     }).promise();
 
-    // update current version
-    data = await dynamodb.update({
+
+    const noteTags = note.tags;
+    const index = noteTags.indexOf(tagId);
+    if (index > -1) {
+      noteTags.splice(index, 1);
+    }
+    
+    await dynamodb.update({
       TableName: tableName,
       Key: {
         id: noteId,
         relationship_id: utils.getCurrentNoteVersionPrefix()
       },
-      UpdateExpression: 'set update_timestamp = :ts, title = :title, content = :content, revision = :revision',
+      UpdateExpression: 'set tags = :tags',
       ExpressionAttributeValues: {
-        ':ts': utils.getCurrentNoteVersionPrefix() + ':' + timestamp,
-        ':title': title,
-        ':content': content,
-        ':revision': parseInt(note.revision) + 1
+        ':tags': noteTags
       },
       ReturnValues: 'UPDATED_NEW'
     }).promise();
@@ -90,10 +83,9 @@ exports.handler = async event => {
     return {
       statusCode: 200,
       headers: utils.getResponseHeaders(),
-      body: JSON.stringify(body)
+      body: JSON.stringify({...note, tags: noteTags})
     }
   } catch (err) {
-    console.log('Error', err);
     return {
       statusCode: err.statusCode ? err.statusCode : 500,
       headers: utils.getResponseHeaders(),
@@ -104,3 +96,18 @@ exports.handler = async event => {
     }
   }
 }
+
+const isCategoryExist = async (tableName, categoryId) => {
+  let params = {
+    TableName: tableName,
+    KeyConditionExpression: 'id = :cate_id and relationship_id = :cate_id',
+    ExpressionAttributeValues: {
+      ':cate_id': categoryId,
+    },
+    Limit: 1
+  };
+
+  let data = await dynamodb.query(params).promise();
+  return _.isEmpty(data.Items) ? false : true;
+}
+

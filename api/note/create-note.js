@@ -7,7 +7,6 @@ const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
 const utils = require('../utils');
-const _ = require('underscore');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
 
@@ -38,8 +37,8 @@ exports.handler = async event => {
     const content = body.content;
     const categoryId = body.category_id;
 
-    const isCateExist = await isCategoryExist(tableName, categoryId);
-    if (!isCateExist) {
+    const category = await utils.getCategory(dynamodb, tableName, categoryId);
+    if (!category) {
       return {
         statusCode: 400,
         headers: utils.getResponseHeaders(),
@@ -90,18 +89,4 @@ exports.handler = async event => {
       })
     }
   }
-}
-
-const isCategoryExist = async (tableName, categoryId) => {
-  let params = {
-    TableName: tableName,
-    KeyConditionExpression: 'id = :cate_id and relationship_id = :cate_id',
-    ExpressionAttributeValues: {
-      ':cate_id': categoryId,
-    },
-    Limit: 1
-  };
-
-  let data = await dynamodb.query(params).promise();
-  return _.isEmpty(data.Items) ? false : true;
 }

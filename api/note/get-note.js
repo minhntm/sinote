@@ -24,7 +24,11 @@ exports.handler = async event => {
     } else {
       return {
         statusCode: 404,
-        headers: utils.getResponseHeaders()
+        headers: utils.getResponseHeaders(),
+        body: JSON.stringify({
+          error: 'Not found',
+          message: 'Note not found'
+        })
       }
     }
 

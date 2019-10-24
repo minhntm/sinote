@@ -1,22 +1,23 @@
 /**
- * Route: PATCH /notes/{note_id}
+ * Route: GET /notes/{note_id}
  */
 
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const utils = require('../utils');
 const moment = require('moment');
+const utils = require('../utils');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let noteId = decodeURIComponent(event.pathParameters.note_id);
+    const noteId = decodeURIComponent(event.pathParameters.note_id);
+    const userId = utils.getUserId(event.headers);
 
     const body = JSON.parse(event.body);
-    if (!body.title || !body.content) {
+    if (!body.from_cate_id || !body.to_cate_id) {
       return {
         statusCode: 400,
         headers: utils.getResponseHeaders(),
@@ -26,9 +27,8 @@ exports.handler = async event => {
         })
       }
     }
-
-    const title = body.title;
-    const content = body.content;
+    const fromCategoryId = body.from_cate_id;
+    const toCategoryId = body.to_cate_id;
     const timestamp = moment().unix();
 
     const note = await utils.getNote(dynamodb, tableName, noteId);
@@ -41,48 +41,63 @@ exports.handler = async event => {
           message: 'Note not found'
         })
       }
+    } 
+
+    if (fromCategoryId !== note.category_id) {
+      return {
+        statusCode: 400,
+        headers: utils.getResponseHeaders(),
+        body: JSON.stringify({
+          error: 'ValueError',
+          message: 'Invalid source category id'
+        })
+      }
     }
 
-    // create revision
-    const newRevision = {
-      id: noteId,
-      relationship_id: 'v' + note.revision,
-      create_timestamp: timestamp.toString(),
-      update_timestamp: timestamp.toString(),
-      title: note.title,
-      content: note.content
-    } 
-    
-    let data = await dynamodb.put({ TableName: tableName, Item: newRevision }).promise();
+    const toCategory = utils.getNote(dynamodb, tableName, toCategoryId);
+    if (!toCategory) {
+      return {
+        statusCode: 400,
+        headers: utils.getResponseHeaders(),
+        body: JSON.stringify({
+          error: 'ValueError',
+          message: 'Invalid destination category id'
+        })
+      }
+    }
 
-    // update title in cate - note relationship
-    data = await dynamodb.update({
+    // delete relationship with old category
+    dynamodb.delete({
       TableName: tableName,
       Key: {
-        id: note.category_id,
+        id: fromCategoryId,
         relationship_id: noteId
-      },
-      UpdateExpression: 'set update_timestamp = :ts, title = :title',
-      ExpressionAttributeValues: {
-        ':ts': utils.NOTE_ID_PREFIX + ':' + timestamp,
-        ':title': title
-      },
-      ReturnValues: 'UPDATED_NEW'
+      }
     }).promise();
 
-    // update current version
+    // create relationship with new category
+    dynamodb.put({
+      TableName: tableName,
+      Item: {
+        id: toCategoryId,
+        relationship_id: noteId,
+        create_timestamp: utils.NOTE_ID_PREFIX + ':' + timestamp,
+        update_timestamp: utils.NOTE_ID_PREFIX + ':' + timestamp,
+        user_id: userId,
+        title: note.title
+      }
+    }).promise();
+
+    // update note
     data = await dynamodb.update({
       TableName: tableName,
       Key: {
         id: noteId,
         relationship_id: utils.getCurrentNoteVersionPrefix()
       },
-      UpdateExpression: 'set update_timestamp = :ts, title = :title, content = :content, revision = :revision',
+      UpdateExpression: 'set category_id = :cate_id',
       ExpressionAttributeValues: {
-        ':ts': utils.getCurrentNoteVersionPrefix() + ':' + timestamp,
-        ':title': title,
-        ':content': content,
-        ':revision': parseInt(note.revision) + 1
+        ':cate_id': toCategoryId
       },
       ReturnValues: 'UPDATED_NEW'
     }).promise();
@@ -90,8 +105,9 @@ exports.handler = async event => {
     return {
       statusCode: 200,
       headers: utils.getResponseHeaders(),
-      body: JSON.stringify(body)
+      body: JSON.stringify({...note, category_id: toCategoryId})
     }
+
   } catch (err) {
     console.log('Error', err);
     return {

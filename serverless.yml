@@ -91,6 +91,17 @@ functions:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
 
+  delete-category:
+    handler: api/category/delete-category.handler
+    description: DELETE /categories/{category_id}
+    events:
+      - http:
+          path: categories/{category_id}
+          method: delete
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
   # tag endpoint
   get-tag:
     handler: api/tag/get-tag.handler
@@ -171,11 +182,33 @@ functions:
             headers: ${self:custom.allowedHeaders}
 
   change-note-category:
-    handler: api/note/change-note-category.handler
+    handler: api/note/change-category.handler
     description: POST /notes/{note_id}/change-note-cate
     events:
       - http:
           path: notes/{note_id}/change-note-cate
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  attach-tag:
+    handler: api/note/attach-tag.handler
+    description: POST /notes/{note_id}/attach-tag
+    events:
+      - http:
+          path: notes/{note_id}/attach-tag
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  unattach-tag:
+    handler: api/note/unattach-tag.handler
+    description: POST /notes/{note_id}/unattach-tag
+    events:
+      - http:
+          path: notes/{note_id}/unattach-tag
           method: post
           cors:
             origin: '*'

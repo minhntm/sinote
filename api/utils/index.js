@@ -41,6 +41,20 @@ const getCategory = async (dynamodb, tableName, categoryId) => {
   return _.isEmpty(data.Items) ? null : data.Items[0];
 }
 
+const getTag = async (dynamodb, tableName, tagId) => {
+  let params = {
+    TableName: tableName,
+    KeyConditionExpression: 'id = :tagId and relationship_id = :tagId',
+    ExpressionAttributeValues: {
+      ':tagId': tagId,
+    },
+    Limit: 1
+  };
+
+  let data = await dynamodb.query(params).promise();
+  return _.isEmpty(data.Items) ? null : data.Items[0];
+}
+
 const getNote = async (dynamodb, tableName, noteId) => {
   let params = {
     TableName: tableName,
@@ -58,6 +72,7 @@ const getNote = async (dynamodb, tableName, noteId) => {
 
 module.exports = {
   getCategory,
+  getTag,
   getNote,
   getUserId,
   getUserName,
