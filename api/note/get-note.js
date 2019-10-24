@@ -5,8 +5,7 @@
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const _ = require('underscore');
-const util = require('../util');
+const utils = require('../utils');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.NOTES_TABLE;
@@ -15,27 +14,17 @@ exports.handler = async event => {
   try {
     let noteId = decodeURIComponent(event.pathParameters.note_id);
 
-    let params = {
-      TableName: tableName,
-      KeyConditionExpression: 'id = :note_id and relationship_id = :version',
-      ExpressionAttributeValues: {
-        ':note_id': noteId,
-        ':version': util.getCurrentNoteVersionPrefix()
-      },
-      Limit: 1
-    };
-
-    let data = await dynamodb.query(params).promise();
-    if (!_.isEmpty(data.Items)) {
+    let data = await utils.getNote(dynamodb, tableName, noteId);
+    if (data) {
       return {
         statusCode: 200,
-        headers: util.getResponseHeaders(),
-        body: JSON.stringify(data.Items[0])
+        headers: utils.getResponseHeaders(),
+        body: JSON.stringify(data)
       }
     } else {
       return {
         statusCode: 404,
-        headers: util.getResponseHeaders()
+        headers: utils.getResponseHeaders()
       }
     }
 
@@ -43,7 +32,7 @@ exports.handler = async event => {
     console.log('Error', err);
     return {
       statusCode: err.statusCode ? err.statusCode : 500,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify({
         error: err.name ? err.name : 'Exception',
         message: err.message ? err.message : 'Unknown error'

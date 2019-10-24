@@ -6,7 +6,7 @@
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const util = require('../util');
+const utils = require('../utils');
 const _ = require('underscore');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
@@ -20,14 +20,14 @@ exports.handler = async event => {
   try {
     const body = JSON.parse(event.body);
 
-    const userId = util.getUserId(event.headers);
-    const noteId = util.NOTE_ID_PREFIX + ':' + uuidv4();
+    const userId = utils.getUserId(event.headers);
+    const noteId = utils.NOTE_ID_PREFIX + ':' + uuidv4();
     const timestamp = moment().unix();
 
     if (!body.title || !body.content || !body.category_id) {
       return {
         statusCode: 400,
-        headers: util.getResponseHeaders(),
+        headers: utils.getResponseHeaders(),
         body: JSON.stringify({
           error: 'ValueError',
           message: 'Missing attribute'
@@ -42,7 +42,7 @@ exports.handler = async event => {
     if (!isCateExist) {
       return {
         statusCode: 400,
-        headers: util.getResponseHeaders(),
+        headers: utils.getResponseHeaders(),
         body: JSON.stringify({
           error: 'ValueError',
           message: 'Invalid category'
@@ -52,9 +52,9 @@ exports.handler = async event => {
 
     const newNote = {
       id: noteId,
-      relationship_id: util.getCurrentNoteVersionPrefix(),
-      create_timestamp: util.getCurrentNoteVersionPrefix() + ':' + timestamp,
-      update_timestamp: util.getCurrentNoteVersionPrefix() + ':' + timestamp,
+      relationship_id: utils.getCurrentNoteVersionPrefix(),
+      create_timestamp: utils.getCurrentNoteVersionPrefix() + ':' + timestamp,
+      update_timestamp: utils.getCurrentNoteVersionPrefix() + ':' + timestamp,
       title: title,
       content: content,
       category_id: categoryId,
@@ -67,9 +67,9 @@ exports.handler = async event => {
     const cateNoteRela = {
       id: categoryId,
       relationship_id: noteId,
-      create_timestamp: util.NOTE_ID_PREFIX + ':' + timestamp,
-      update_timestamp: util.NOTE_ID_PREFIX + ':' + timestamp,
-      userId: userId,
+      create_timestamp: utils.NOTE_ID_PREFIX + ':' + timestamp,
+      update_timestamp: utils.NOTE_ID_PREFIX + ':' + timestamp,
+      user_id: userId,
       title: title
     }
 
@@ -77,13 +77,13 @@ exports.handler = async event => {
 
     return {
       statusCode: 200,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify(newNote)
     }
   } catch (err) {
     return {
       statusCode: err.statusCode ? err.statusCode : 500,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify({
         error: err.name ? err.name : 'Exception',
         message: err.message ? err.message : 'Unknown error'

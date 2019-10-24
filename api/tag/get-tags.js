@@ -5,14 +5,14 @@
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const util = require('../util');
+const utils = require('../utils');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let userId = util.getUserId(event.headers);
+    let userId = utils.getUserId(event.headers);
 
     let params = {
       TableName: tableName,
@@ -20,7 +20,7 @@ exports.handler = async event => {
       KeyConditionExpression: 'user_id = :uid and begins_with(update_timestamp, :prefix_tag_id)',
       ExpressionAttributeValues: {
         ':uid': userId,
-        ':prefix_tag_id': util.TAG_ID_PREFIX
+        ':prefix_tag_id': utils.TAG_ID_PREFIX
       },
       ScanIndexForward: false
     };
@@ -29,14 +29,14 @@ exports.handler = async event => {
 
     return {
       statusCode: 200,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify(data)
     }
   } catch (err) {
     console.log('Error', err);
     return {
       statusCode: err.statusCode ? err.statusCode : 500,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify({
         error: err.name ? err.name : 'Exception',
         message: err.message ? err.message : 'Unknown error'

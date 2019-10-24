@@ -5,7 +5,7 @@
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const util = require('../util');
+const utils = require('../utils');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
 
@@ -16,14 +16,14 @@ exports.handler = async event => {
   try {
     const body = JSON.parse(event.body);
 
-    const userId = util.getUserId(event.headers);
-    const cateId = util.CATEGORY_ID_PREFIX + ':' + uuidv4();
-    const timestamp = util.CATEGORY_ID_PREFIX + ':' + moment().unix();
+    const userId = utils.getUserId(event.headers);
+    const cateId = utils.CATEGORY_ID_PREFIX + ':' + uuidv4();
+    const timestamp = utils.CATEGORY_ID_PREFIX + ':' + moment().unix();
 
     if (!body.name) {
       return {
         statusCode: 400,
-        headers: util.getResponseHeaders(),
+        headers: utils.getResponseHeaders(),
         body: JSON.stringify({
           error: 'ValueError',
           message: 'Missing name attribute'
@@ -47,14 +47,14 @@ exports.handler = async event => {
 
     return {
       statusCode: 200,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify(newCate)
     }
   } catch (err) {
     console.log('Error', err);
     return {
       statusCode: err.statusCode ? err.statusCode : 500,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify({
         error: err.name ? err.name : 'Exception',
         message: err.message ? err.message : 'Unknown error'

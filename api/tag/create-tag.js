@@ -5,7 +5,7 @@
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-1' });
 
-const util = require('../util');
+const utils = require('../utils');
 const moment = require('moment');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
@@ -18,7 +18,7 @@ exports.handler = async event => {
     if (!body.name) {
       return {
         statusCode: 400,
-        headers: util.getResponseHeaders(),
+        headers: utils.getResponseHeaders(),
         body: JSON.stringify({
           error: 'ValueError',
           message: 'Missing name attribute'
@@ -27,9 +27,9 @@ exports.handler = async event => {
     }
     const name = body.name;
 
-    const userId = util.getUserId(event.headers);
-    const tagId = util.TAG_ID_PREFIX + ':' + name + userId;
-    const timestamp = util.TAG_ID_PREFIX + ':' + moment().unix();
+    const userId = utils.getUserId(event.headers);
+    const tagId = utils.TAG_ID_PREFIX + ':' + name + userId;
+    const timestamp = utils.TAG_ID_PREFIX + ':' + moment().unix();
 
     const newTag = {
       id: tagId,
@@ -47,14 +47,14 @@ exports.handler = async event => {
 
     return {
       statusCode: 200,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify(newTag)
     }
   } catch (err) {
     console.log('Error', err);
     return {
       statusCode: err.statusCode ? err.statusCode : 500,
-      headers: util.getResponseHeaders(),
+      headers: utils.getResponseHeaders(),
       body: JSON.stringify({
         error: err.name ? err.name : 'Exception',
         message: err.message ? err.message : 'Unknown error'

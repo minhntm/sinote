@@ -80,6 +80,17 @@ functions:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
 
+  update-category:
+    handler: api/category/update-category.handler
+    description: PATCH /categories/{category_id}
+    events:
+      - http:
+          path: categories/{category_id}
+          method: patch
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
   # tag endpoint
   get-tag:
     handler: api/tag/get-tag.handler
@@ -155,6 +166,17 @@ functions:
       - http:
           path: notes/{note_id}
           method: patch
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
+  change-note-category:
+    handler: api/note/change-note-category.handler
+    description: POST /notes/{note_id}/change-note-cate
+    events:
+      - http:
+          path: notes/{note_id}/change-note-cate
+          method: post
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
