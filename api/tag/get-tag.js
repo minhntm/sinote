@@ -15,21 +15,12 @@ exports.handler = async event => {
   try {
     let tagId = decodeURIComponent(event.pathParameters.tag_id);
 
-    let params = {
-      TableName: tableName,
-      KeyConditionExpression: 'id = :tag_id and relationship_id = :tag_id',
-      ExpressionAttributeValues: {
-        ':tag_id': tagId,
-      },
-      Limit: 1
-    };
-
-    let data = await dynamodb.query(params).promise();
-    if (!_.isEmpty(data.Items)) {
+    let tag = await utils.getTag(dynamodb, tableName, tagId);
+    if (tag) {
       return {
         statusCode: 200,
         headers: utils.getResponseHeaders(),
-        body: JSON.stringify(data.Items[0])
+        body: JSON.stringify(tag)
       }
     } else {
       return {

@@ -192,6 +192,17 @@ functions:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
 
+  delete-note:
+    handler: api/note/delete-note.handler
+    description: DELETE /notes/{note_id}
+    events:
+      - http:
+          path: notes/{note_id}
+          method: delete
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
   attach-tag:
     handler: api/note/attach-tag.handler
     description: POST /notes/{note_id}/attach-tag

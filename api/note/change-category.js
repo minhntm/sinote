@@ -1,5 +1,5 @@
 /**
- * Route: GET /notes/{note_id}
+ * Route: POST /notes/{note_id}/change-note-cate
  */
 
 const AWS = require('aws-sdk');
