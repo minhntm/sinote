@@ -12,24 +12,15 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let cateId = decodeURIComponent(event.pathParameters.cate_id);
+    let cateId = decodeURIComponent(event.pathParameters.categoryId);
 
-    let params = {
-      TableName: tableName,
-      KeyConditionExpression: 'id = :cate_id and relationship_id = :cate_id',
-      ExpressionAttributeValues: {
-        ':cate_id': cateId,
-      },
-      Limit: 1
-    };
-
-    let data = await utils.getCategory(dynamodb, tableName, cateId);
+    let category = await utils.getCategory(dynamodb, tableName, cateId);
     
-    if (data) {
+    if (category) {
       return {
         statusCode: 200,
         headers: utils.getResponseHeaders(),
-        body: JSON.stringify(data)
+        body: JSON.stringify(category)
       }
     } else {
       return {

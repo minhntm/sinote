@@ -35,24 +35,13 @@ provider:
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.NOTES_TABLE}'
 
 functions:
-  hello:
-    handler: handler.hello
-    description: POST /hello
-    events:
-      - http:
-          path: hello
-          method: post
-          cors:
-            origin: '*'
-            headers: ${self:custom.allowedHeaders}
-
   # category endpoint
   get-category:
     handler: api/category/get-category.handler
-    description: GET /categories/{cate_id}
+    description: GET /categories/{categoryId}
     events:
       - http:
-          path: categories/{cate_id}
+          path: categories/{categoryId}
           method: get
           cors:
             origin: '*'
@@ -82,10 +71,10 @@ functions:
 
   update-category:
     handler: api/category/update-category.handler
-    description: PATCH /categories/{category_id}
+    description: PATCH /categories/{categoryId}
     events:
       - http:
-          path: categories/{category_id}
+          path: categories/{categoryId}
           method: patch
           cors:
             origin: '*'
@@ -93,10 +82,10 @@ functions:
 
   delete-category:
     handler: api/category/delete-category.handler
-    description: DELETE /categories/{category_id}
+    description: DELETE /categories/{categoryId}
     events:
       - http:
-          path: categories/{category_id}
+          path: categories/{categoryId}
           method: delete
           cors:
             origin: '*'
@@ -105,10 +94,10 @@ functions:
   # tag endpoint
   get-tag:
     handler: api/tag/get-tag.handler
-    description: GET /tags/{tag_id}
+    description: GET /tags/{tagId}
     events:
       - http:
-          path: tags/{tag_id}
+          path: tags/{tagId}
           method: get
           cors:
             origin: '*'
@@ -139,10 +128,10 @@ functions:
   # note endpoint
   get-note:
     handler: api/note/get-note.handler
-    description: GET /notes/{note_id}
+    description: GET /notes/{noteId}
     events:
       - http:
-          path: notes/{note_id}
+          path: notes/{noteId}
           method: get
           cors:
             origin: '*'
@@ -172,10 +161,10 @@ functions:
 
   update-note:
     handler: api/note/update-note.handler
-    description: PATCH /notes/{note_id}
+    description: PATCH /notes/{noteId}
     events:
       - http:
-          path: notes/{note_id}
+          path: notes/{noteId}
           method: patch
           cors:
             origin: '*'
@@ -183,10 +172,10 @@ functions:
 
   change-note-category:
     handler: api/note/change-category.handler
-    description: POST /notes/{note_id}/change-note-cate
+    description: POST /notes/{noteId}/change-note-cate
     events:
       - http:
-          path: notes/{note_id}/change-note-cate
+          path: notes/{noteId}/change-note-cate
           method: post
           cors:
             origin: '*'
@@ -194,10 +183,10 @@ functions:
 
   delete-note:
     handler: api/note/delete-note.handler
-    description: DELETE /notes/{note_id}
+    description: DELETE /notes/{noteId}
     events:
       - http:
-          path: notes/{note_id}
+          path: notes/{noteId}
           method: delete
           cors:
             origin: '*'
@@ -205,10 +194,10 @@ functions:
 
   attach-tag:
     handler: api/note/attach-tag.handler
-    description: POST /notes/{note_id}/attach-tag
+    description: POST /notes/{noteId}/attach-tag
     events:
       - http:
-          path: notes/{note_id}/attach-tag
+          path: notes/{noteId}/attach-tag
           method: post
           cors:
             origin: '*'
@@ -216,10 +205,10 @@ functions:
 
   unattach-tag:
     handler: api/note/unattach-tag.handler
-    description: POST /notes/{note_id}/unattach-tag
+    description: POST /notes/{noteId}/unattach-tag
     events:
       - http:
-          path: notes/{note_id}/unattach-tag
+          path: notes/{noteId}/unattach-tag
           method: post
           cors:
             origin: '*'

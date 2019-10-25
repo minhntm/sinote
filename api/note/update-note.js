@@ -13,7 +13,7 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let noteId = decodeURIComponent(event.pathParameters.note_id);
+    let noteId = decodeURIComponent(event.pathParameters.noteId);
 
     const body = JSON.parse(event.body);
     if (!body.title || !body.content) {

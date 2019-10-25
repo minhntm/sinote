@@ -12,7 +12,7 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let noteId = decodeURIComponent(event.pathParameters.note_id);
+    let noteId = decodeURIComponent(event.pathParameters.noteId);
 
     let data = await utils.getNote(dynamodb, tableName, noteId);
     if (data) {

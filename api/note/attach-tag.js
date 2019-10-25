@@ -15,7 +15,7 @@ exports.handler = async event => {
   // TODO: category is optinal
   // if missing this value, set it to default category
   try {
-    const noteId = decodeURIComponent(event.pathParameters.note_id);
+    const noteId = decodeURIComponent(event.pathParameters.noteId);
     const body = JSON.parse(event.body);
 
     const timestamp = moment().unix();

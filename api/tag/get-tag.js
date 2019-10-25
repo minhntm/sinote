@@ -13,7 +13,7 @@ const tableName = process.env.NOTES_TABLE;
 
 exports.handler = async event => {
   try {
-    let tagId = decodeURIComponent(event.pathParameters.tag_id);
+    let tagId = decodeURIComponent(event.pathParameters.tagId);
 
     let tag = await utils.getTag(dynamodb, tableName, tagId);
     if (tag) {
