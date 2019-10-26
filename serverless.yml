@@ -2,6 +2,7 @@ service: sinote
 
 plugins:
   - serverless-offline
+  - serverless-domain-manager
 
 custom:
   allowedHeaders:
@@ -15,6 +16,12 @@ custom:
     - X-Amz-User-Agent
     - app_user_id
     - app_user_name
+  customDomain:
+    domainName: api.sinote.me
+    basePath: 'v1'
+    stage: ${self:provider.stage}
+    certificateName: sinote.me
+    createRoute53Record: true
 
 provider:
   name: aws
@@ -40,6 +47,17 @@ provider:
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.NOTES_TABLE}/index/*'
 
 functions:
+  hello:
+    handler: api/hello.handler
+    description: GET /
+    events:
+      - http:
+          path: /
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
   # category endpoint
   get-category:
     handler: api/category/get-category.handler
