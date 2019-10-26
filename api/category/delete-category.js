@@ -22,10 +22,12 @@ exports.handler = async event => {
       }
     }).promise();
 
-    categoryNoteRelationship.Items.forEach(async item => {
+    for (i=0; i<categoryNoteRelationship.Items.length; i++){
+      let item = categoryNoteRelationship.Items[i];
+      
       if (item.relationship_id.startsWith(utils.NOTE_ID_PREFIX)) {
         let note = await utils.getNote(dynamodb, tableName, item.relationship_id);
-        for (i=0; i<parseInt(note.revision); i++) {
+        for (let i=0; i<parseInt(note.revision); i++) {
           await dynamodb.delete({
             TableName: tableName,
             Key: {
@@ -34,30 +36,31 @@ exports.handler = async event => {
             }
           }).promise();
         }
+        
 
         // delete tags
         if (note.tags) {
-          note.tags.forEach(async tag => {
+          for (let i=0; i<note.tags.length; i++){
             await dynamodb.delete({
               TableName: tableName,
               Key: {
-                id: tag,
+                id: note.tags[i],
                 relationship_id: note.id
               }
             }).promise();
-          })
+          }
         }
       }
 
       // delete relationship
-      await dynamodb.delete({
+      let data = await dynamodb.delete({
         TableName: tableName,
         Key: {
           id: categoryId,
           relationship_id: item.relationship_id
         }
       }).promise();
-    })
+    }
 
     return {
       statusCode: 204,
