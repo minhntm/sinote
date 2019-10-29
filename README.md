@@ -16,7 +16,7 @@ An simple note application is built with Serverless Architecture
 - Create a AWS Account
 - Following this [guide](https://serverless.com/framework/docs/providers/aws/guide/quick-start/) to setup Serverless framework
 - Following this [guide](https://serverless.com/framework/docs/providers/aws/guide/credentials/) to setup AWS Credentials
-- Delete this code in `serverless.yml` if you don't using custom domain
+- Delete this code in `serverless.yml` if you don't use custom domain
 ```
   customDomain:
     domainName: api.sinote.me

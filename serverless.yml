@@ -33,6 +33,7 @@ provider:
   endpointType: regional
   environment:
     NOTES_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    COGNITO_IDENTITY_POOL_ID: ap-northeast-1:87753187-b49f-4d5d-90cb-dfcc9c194baa
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -47,6 +48,17 @@ provider:
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.NOTES_TABLE}/index/*'
 
 functions:
+  authenticate-google:
+    handler: api/authenticate/google.handler
+    description: Google IDP Authentication
+    events:
+      - http:
+          path: auth
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+
   hello:
     handler: api/hello.handler
     description: GET /
@@ -66,6 +78,7 @@ functions:
       - http:
           path: categories/{categoryId}
           method: get
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -77,6 +90,7 @@ functions:
       - http:
           path: categories
           method: get
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -88,6 +102,7 @@ functions:
       - http:
           path: categories
           method: post
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -99,6 +114,7 @@ functions:
       - http:
           path: categories/{categoryId}
           method: patch
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -110,6 +126,7 @@ functions:
       - http:
           path: categories/{categoryId}
           method: delete
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -122,6 +139,7 @@ functions:
       - http:
           path: tags/{tagId}
           method: get
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -133,6 +151,7 @@ functions:
       - http:
           path: tags
           method: get
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -144,6 +163,7 @@ functions:
       - http:
           path: tags
           method: post
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -156,6 +176,7 @@ functions:
       - http:
           path: notes/{noteId}
           method: get
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -167,6 +188,7 @@ functions:
       - http:
           path: notes
           method: get
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -178,6 +200,7 @@ functions:
       - http:
           path: notes
           method: post
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -189,6 +212,7 @@ functions:
       - http:
           path: notes/{noteId}
           method: patch
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -200,6 +224,7 @@ functions:
       - http:
           path: notes/{noteId}/change-note-cate
           method: post
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -211,6 +236,7 @@ functions:
       - http:
           path: notes/{noteId}
           method: delete
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -222,6 +248,7 @@ functions:
       - http:
           path: notes/{noteId}/attach-tag
           method: post
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -233,6 +260,7 @@ functions:
       - http:
           path: notes/{noteId}/unattach-tag
           method: post
+          authorizer: aws_iam
           cors:
             origin: '*'
             headers: ${self:custom.allowedHeaders}
@@ -292,3 +320,22 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
